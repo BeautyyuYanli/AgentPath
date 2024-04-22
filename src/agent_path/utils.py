@@ -1,11 +1,11 @@
 import pprint
-from typing import Any, Optional
+from typing import Any, ClassVar, Dict, Optional
 
 
 class FancyPrinter:
     pp = pprint.PrettyPrinter(indent=2, sort_dicts=False)
     # Thanks to https://www.learnui.design/tools/data-color-picker.html
-    COLORS_rgb = {
+    COLORS_rgb: ClassVar[Dict[str, str]] = {
         "dark_blue": "38;2;0;63;92",
         "blue": "38;2;47;75;124",
         "purple": "38;2;102;81;145",
