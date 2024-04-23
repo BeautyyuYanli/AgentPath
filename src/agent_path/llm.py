@@ -10,7 +10,7 @@ from llama_index.llms.openai import OpenAI
 from openai.types.chat import ChatCompletionMessageToolCall
 from pydantic import BaseModel, ValidationError
 
-from agent_path.utils import clear_json, fancy_print
+from agent_path.utils import fancy_print, get_json_object, get_xml_tags
 
 
 class LLM:
@@ -102,10 +102,9 @@ The answer output
             )
 
             # Generate response until contains valid answer or action
-            action: Optional[Reason.Action] = None
-            ans_output: Optional[str] = None
             while True:
                 res = self.generate(prompt)
+                tags = get_xml_tags(res)
 
                 def fail(ans: str):
                     if self.verbose:
@@ -113,38 +112,23 @@ The answer output
                         fancy_print(ans, color="red")
                         fancy_print("retrying...", color="red")
 
-                if (ans_start := res.find("<ANSWER_OUTPUT>")) != -1 and (
-                    ans_end := res.find("</ANSWER_OUTPUT>")
-                ) != -1:
-                    ans_output = res[
-                        ans_start + len("<ANSWER_OUTPUT>") : ans_end
-                    ].strip()
-
-                if (act_start := res.find("<ACTION>")) != -1 and (
-                    act_end := res.find("</ACTION>")
-                ) != -1:
-                    try:
-                        action = Reason.Action.model_validate_json(
-                            clear_json(res[act_start + len("<ACTION>") : act_end])
-                        )
-                    except ValidationError:
-                        fail(res)
-                        continue
+                thought_str = tags.get("THOUGHT", None)
+                ans_output = tags.get("ANSWER_OUTPUT", None)
+                action_str = tags.get("ACTION", None)
+                try:
+                    action = (
+                        Reason.Action.model_validate_json(get_json_object(action_str))
+                        if action_str
+                        else None
+                    )
+                except ValidationError:
+                    fail(res)
+                    continue
 
                 if ans_output or action:
                     break
                 else:
                     fail(res)
-
-            # extract thought if exists
-            if (thought_start := res.find("<THOUGHT>")) != -1 and (
-                thought_end := res.find("</THOUGHT>")
-            ) != -1:
-                thought_str = res[
-                    thought_start + len("<THOUGHT>") : thought_end
-                ].strip()
-            else:
-                thought_str = None
 
             if self.verbose:
                 fancy_print("========================")
@@ -168,17 +152,16 @@ The answer output
             else:
                 observation = tool.call(**action.arguments).content
 
-            this_reason = Reason(
-                thought=thought_str, action=action, observation=observation
-            )
             if self.verbose:
                 fancy_print(
-                    "OBERVATION:\n" + this_reason.observation,
+                    "OBERVATION:\n" + observation,
                     color="red" if failed else None,
                 )
 
             # Append to history, continue loop
-            history.append(this_reason)
+            history.append(
+                Reason(thought=thought_str, action=action, observation=observation)
+            )
 
     def generate_with_tools_api(self, text: str, tools: List[FunctionTool]) -> str:
         if not isinstance(self.client, OpenAI):

@@ -1,4 +1,5 @@
 import pprint
+import re
 from typing import Any, ClassVar, Dict, Optional
 
 
@@ -37,5 +38,16 @@ class FancyPrinter:
 fancy_print = FancyPrinter()
 
 
-def clear_json(text: str) -> str:
-    return text.strip().replace("```json", "").replace("```", "").strip()
+_re_json_state = re.compile(r"{.+[:,].+}|\[.+[,:].+\]", re.DOTALL | re.MULTILINE)
+
+
+def get_json_object(dirty_str: str) -> str:
+    return _re_json_state.findall(dirty_str)[0]
+
+
+_re_xml_state = re.compile(r"<(\w+)>(.*?)<\/\1>", re.DOTALL | re.MULTILINE)
+
+
+def get_xml_tags(dirty_str: str) -> Dict[str, str]:
+    matches = _re_xml_state.findall(dirty_str)
+    return {match[0]: match[1].strip() for match in matches}
