@@ -5,7 +5,7 @@
 groups = ["default"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:993da2af7bb8e22091b7d06ae4bf7de9106b7b72cfbb400c6a8e8671e135fc03"
+content_hash = "sha256:c1c701a1aab251400255b1bde5d9be008f4ee716f01d16adea86317eaec94dfc"
 
 [[package]]
 name = "aiohttp"
@@ -234,13 +234,15 @@ files = [
 ]
 
 [[package]]
-name = "fancy-print"
+name = "fancy-printer"
 version = "0.1.0"
 requires_python = ">=3.8"
-git = "https://github.com/BeautyyuYanli/fancy_print.git"
-revision = "41b92ce71573fd3a5343dd50ea2f7345b2582684"
 summary = "A fancy print function for Python"
 groups = ["default"]
+files = [
+    {file = "fancy_printer-0.1.0-py3-none-any.whl", hash = "sha256:f28e1c26a92dcc8a7d83594c3d4bf1df7074da496f9b7da551def94ffcd1e5f5"},
+    {file = "fancy_printer-0.1.0.tar.gz", hash = "sha256:2c72a4e74510d5924a38792e7a5b395b5cc8602a92a59167ac6c769334ebbd12"},
+]
 
 [[package]]
 name = "frozenlist"
