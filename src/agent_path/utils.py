@@ -1,5 +1,5 @@
 import re
-from fancy_print import FancyPrinter
+from fancy_printer import FancyPrinter
 from typing import Dict
 
 
